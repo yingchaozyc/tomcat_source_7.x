@@ -18,6 +18,8 @@ package org.apache.catalina;
 
 /**
  * Global constants that are applicable to multiple packages within Catalina.
+ * 
+ * org.apache.catalina包下的全局常量类。
  *
  * @author Craig R. McClanahan
  * @version $Id: Globals.java 1545665 2013-11-26 14:07:45Z markt $
@@ -260,6 +262,11 @@ public final class Globals {
     /**
      * Name of the system property containing
      * the tomcat product installation path
+     * 
+     *  <p>
+     *  CATALINA_HOME主要用来指明Tomcat核心运行文件及核心库文件的位置，bin，lib文件夹的位置由这个变量计算得来。   
+	 *	但也可以不配置这个环境变量，默认情况下Tomcat会根据启动脚本的位置来推断这个环境变量，这时会有$CATALINA_HOME=$CATALINA_BASE=Tomcat的安装目录。 
+	 *	</p>
      */
     public static final String CATALINA_HOME_PROP = "catalina.home";
 
@@ -267,6 +274,11 @@ public final class Globals {
     /**
      * Name of the system property containing
      * the tomcat instance installation path
+     *  
+     *  <p>
+     *  CATALINA_BASE用来指明Web应用（Web applications）位置及Tomcat实例相关配置文件的位置。work，logs，temp，webapps，conf文件夹的位置由这个变量计算得来。 
+	 *	但也可以不配置这个环境变量，默认情况下Tomcat会根据启动脚本的位置来推断。这时会有$CATALINA_HOME=$CATALINA_BASE=Tomcat的安装目录。  
+	 *  </p> 
      */
     public static final String CATALINA_BASE_PROP = "catalina.base";
 

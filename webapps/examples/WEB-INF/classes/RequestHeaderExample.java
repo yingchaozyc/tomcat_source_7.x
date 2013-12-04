@@ -14,19 +14,14 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-/* $Id: RequestHeaderExample.java 1337719 2012-05-12 23:06:04Z kkolinko $
+/* $Id: RequestHeaderExample.java 1345382 2012-06-01 22:53:14Z kkolinko $
  *
  */
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Enumeration;
-import java.util.ResourceBundle;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.util.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
 
 import util.HTMLFilter;
 
@@ -38,11 +33,8 @@ import util.HTMLFilter;
 
 public class RequestHeaderExample extends HttpServlet {
 
-    private static final long serialVersionUID = 1L;
-
-    private static final ResourceBundle RB = ResourceBundle.getBundle("LocalStrings");
-
-    @Override
+    ResourceBundle rb = ResourceBundle.getBundle("LocalStrings");
+    
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response)
         throws IOException, ServletException
@@ -53,17 +45,17 @@ public class RequestHeaderExample extends HttpServlet {
         out.println("<html>");
         out.println("<head>");
 
-        String title = RB.getString("requestheader.title");
+        String title = rb.getString("requestheader.title");
         out.println("<title>" + title + "</title>");
         out.println("</head>");
         out.println("<body bgcolor=\"white\">");
 
-        // all links relative
+	// all links relative
 
         // XXX
         // making these absolute till we work out the
-        // addition of a PathInfo issue
-
+        // addition of a PathInfo issue 
+	
         out.println("<a href=\"../reqheaders.html\">");
         out.println("<img src=\"../images/code.gif\" height=24 " +
                     "width=24 align=right border=0 alt=\"view code\"></a>");
@@ -73,9 +65,9 @@ public class RequestHeaderExample extends HttpServlet {
 
         out.println("<h3>" + title + "</h3>");
         out.println("<table border=0>");
-        Enumeration<String> e = request.getHeaderNames();
+        Enumeration e = request.getHeaderNames();
         while (e.hasMoreElements()) {
-            String headerName = e.nextElement();
+            String headerName = (String)e.nextElement();
             String headerValue = request.getHeader(headerName);
             out.println("<tr><td bgcolor=\"#CCCCCC\">");
             out.println(HTMLFilter.filter(headerName));
@@ -86,7 +78,6 @@ public class RequestHeaderExample extends HttpServlet {
         out.println("</table>");
     }
 
-    @Override
     public void doPost(HttpServletRequest request,
                       HttpServletResponse response)
         throws IOException, ServletException

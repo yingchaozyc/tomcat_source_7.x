@@ -16,34 +16,29 @@
 */
 package examples;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Locale;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspTagException;
-import javax.servlet.jsp.JspWriter;
-import javax.servlet.jsp.tagext.TagSupport;
+import javax.servlet.jsp.*;
+import javax.servlet.jsp.tagext.*;
+
+import java.io.*;
 
 /**
  * Display the sources of the JSP file.
  */
-public class ShowSource extends TagSupport {
-
-    private static final long serialVersionUID = 1L;
-
+public class ShowSource
+    extends TagSupport
+{
     String jspFile;
-
+    
     public void setJspFile(String jspFile) {
         this.jspFile = jspFile;
     }
 
-    @Override
     public int doEndTag() throws JspException {
-        if ((jspFile.indexOf( ".." ) >= 0) ||
-            (jspFile.toUpperCase(Locale.ENGLISH).indexOf("/WEB-INF/") != 0) ||
-            (jspFile.toUpperCase(Locale.ENGLISH).indexOf("/META-INF/") != 0))
-            throw new JspTagException("Invalid JSP file " + jspFile);
+	if ((jspFile.indexOf( ".." ) >= 0) ||
+            (jspFile.toUpperCase().indexOf("/WEB-INF/") != 0) ||
+            (jspFile.toUpperCase().indexOf("/META-INF/") != 0))
+	    throw new JspTagException("Invalid JSP file " + jspFile);
 
         InputStream in
             = pageContext.getServletContext().getResourceAsStream(jspFile);
@@ -71,4 +66,6 @@ public class ShowSource extends TagSupport {
     }
 }
 
-
+    
+        
+    

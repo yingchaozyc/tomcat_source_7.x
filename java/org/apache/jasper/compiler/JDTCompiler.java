@@ -165,10 +165,11 @@ public class JDTCompiler extends org.apache.jasper.compiler.Compiler {
                 return result;
             }
 
-            @Override
-            public boolean ignoreOptionalProblems() {
-                return false;
-            }
+//			  这里是我注释的。会出一个奇怪的错误。接口类貌似没这个方法
+//            @Override				
+//            public boolean ignoreOptionalProblems() {
+//                return false;
+//            }
         }
 
         final INameEnvironment env = new INameEnvironment() {

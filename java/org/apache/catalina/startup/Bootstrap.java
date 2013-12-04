@@ -43,7 +43,11 @@ import org.apache.juli.logging.LogFactory;
  * roundabout approach is to keep the Catalina internal classes (and any
  * other classes they depend on, such as an XML parser) out of the system
  * class path and therefore not visible to application level classes.
- *
+ * 
+ * Bootstrap是核心Catalina的引导类加载器。它构造了一个类加载器去加载Catalina的核心类以及
+ * CatalinaHome下的jar文件。同时启动容器。 用了这种迂回的方式去加载Catalina内部的类(包括
+ * 他依赖的类)是为了对上层应用保持不可见。是一种安全性的体现。
+ * 
  * @author Craig R. McClanahan
  * @author Remy Maucherat
  * @version $Id: Bootstrap.java 1529816 2013-10-07 10:55:18Z markt $
@@ -64,27 +68,35 @@ public final class Bootstrap {
 
     static {
         // Will always be non-null
+    	// 当前工作目录。永远不为空的值。
         String userDir = System.getProperty("user.dir");
 
-        // Home first
+        // Home first 
         String home = System.getProperty(Globals.CATALINA_HOME_PROP);
         File homeFile = null;
-
+        
+        // 如果能拿到CATALINA_HOME做如下的处理
         if (home != null) {
             File f = new File(home);
             try {
+            	// 先获取对应系统下的绝对路径, 再获取对应系统下的规范路径名称。做一些对应于不同OS的特殊处理。比如
+            	// 移除多余的名称（比如 "." 和 ".."）、分析符号连接（对于 UNIX 平台），以及将驱动器名转换成标准大小写形式（对于 Microsoft Windows 平台）。
                 homeFile = f.getCanonicalFile();
             } catch (IOException ioe) {
+            	// 只是获取对应系统下的绝对路径。
                 homeFile = f.getAbsoluteFile();
             }
         }
 
+        // 如果CATALINA_HOME的绝对路径是无效的做如下处理
         if (homeFile == null) {
             // First fall-back. See if current directory is a bin directory
             // in a normal Tomcat install
+        	// 容错处理，拿到bootstrap.jar的路径准备去定位
             File bootstrapJar = new File(userDir, "bootstrap.jar");
 
-            if (bootstrapJar.exists()) {
+            // 如果bootstrap.jar存在， 用它的上一级作为CATALINA_HOME. 
+            if (bootstrapJar.exists()) { 
                 File f = new File(userDir, "..");
                 try {
                     homeFile = f.getCanonicalFile();
@@ -94,6 +106,7 @@ public final class Bootstrap {
             }
         }
 
+        // 实在取不到这个CATALINA_HOME， 就临时用工作目录user.dir来代替了
         if (homeFile == null) {
             // Second fall-back. Use current directory
             File f = new File(userDir);
@@ -104,11 +117,16 @@ public final class Bootstrap {
             }
         }
 
+        // 到这里CATALINA_HOME是肯定有值了，最起码也是user.dir! 当然我们如果自己设置的话也应该是user.dir...
         catalinaHomeFile = homeFile;
-        System.setProperty(
-                Globals.CATALINA_HOME_PROP, catalinaHomeFile.getPath());
+        
+        // 更改环境变量CATALINA_HOME。
+        System.setProperty(Globals.CATALINA_HOME_PROP, catalinaHomeFile.getPath());
 
         // Then base
+        // OK，下来是环境变量CONTALINA_BASE的设置。相对步骤简单很多。
+        // 如果我们在环境变量中有设置过那么就直接取这个值。如果没有设置，则直接使用CATALINA_HOME
+        // 同时将最后拿到的值塞到运行时的系统变量中。
         String base = System.getProperty(Globals.CATALINA_BASE_PROP);
         if (base == null) {
             catalinaBaseFile = catalinaHomeFile;
@@ -154,6 +172,8 @@ public final class Bootstrap {
         } catch (Throwable t) {
             handleThrowable(t);
             log.error("Class loader creation threw exception", t);
+            
+            // 类加载器创建异常，直接退出
             System.exit(1);
         }
     }

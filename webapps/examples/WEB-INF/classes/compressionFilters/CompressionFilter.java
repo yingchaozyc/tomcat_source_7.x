@@ -14,15 +14,11 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+
 package compressionFilters;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.List;
-import java.util.StringTokenizer;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -32,14 +28,17 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+
 /**
  * Implementation of <code>javax.servlet.Filter</code> used to compress
  * the ServletResponse if it is bigger than a threshold.
  *
  * @author Amy Roh
  * @author Dmitri Valdin
+ * @version $Id: CompressionFilter.java 939521 2010-04-30 00:16:33Z kkolinko $
  */
-public class CompressionFilter implements Filter {
+
+public class CompressionFilter implements Filter{
 
     /**
      * The filter configuration object we are associated with.  If this value
@@ -48,32 +47,18 @@ public class CompressionFilter implements Filter {
     private FilterConfig config = null;
 
     /**
-     * Minimal reasonable threshold.
+     * Minimal reasonable threshold
      */
-    private final int minThreshold = 128;
+    private int minThreshold = 128;
+
 
     /**
-     * The threshold number to compress.
+     * The threshold number to compress
      */
-    protected int compressionThreshold = 0;
+    protected int compressionThreshold;
 
     /**
-     * Minimal reasonable buffer.
-     */
-    private final int minBuffer = 8192;  // 8KB is what tomcat would use by default anyway
-
-    /**
-     * The compression buffer size to avoid chunking.
-     */
-    protected int compressionBuffer = 0;
-
-    /**
-     * The mime types to compress.
-     */
-    protected String[] compressionMimeTypes = {"text/html", "text/xml", "text/plain"};
-
-    /**
-     * Debug level for this filter.
+     * Debug level for this filter
      */
     private int debug = 0;
 
@@ -82,7 +67,7 @@ public class CompressionFilter implements Filter {
      *
      * @param filterConfig The filter configuration object
      */
-    @Override
+
     public void init(FilterConfig filterConfig) {
 
         config = filterConfig;
@@ -90,8 +75,9 @@ public class CompressionFilter implements Filter {
             String value = filterConfig.getInitParameter("debug");
             if (value!=null) {
                 debug = Integer.parseInt(value);
+            } else {
+                debug = 0;
             }
-
             String str = filterConfig.getInitParameter("compressionThreshold");
             if (str!=null) {
                 compressionThreshold = Integer.parseInt(str);
@@ -102,44 +88,12 @@ public class CompressionFilter implements Filter {
                     }
                     compressionThreshold = minThreshold;
                 }
+            } else {
+                compressionThreshold = 0;
             }
 
-            str = filterConfig.getInitParameter("compressionBuffer");
-            if (str!=null) {
-                compressionBuffer = Integer.parseInt(str);
-                if (compressionBuffer < minBuffer) {
-                    if (debug > 0) {
-                        System.out.println("compressionBuffer should be >= " + minBuffer);
-                        System.out.println("compressionBuffer set to " + minBuffer);
-                    }
-                    compressionBuffer = minBuffer;
-                }
-            }
-
-            str = filterConfig.getInitParameter("compressionMimeTypes");
-            if (str!=null) {
-                List<String> values = new ArrayList<>();
-                StringTokenizer st = new StringTokenizer(str, ",");
-
-                while (st.hasMoreTokens()) {
-                    String token = st.nextToken().trim();
-                    if (token.length() > 0) {
-                        values.add(token);
-                    }
-                }
-
-                if (values.size() > 0) {
-                    compressionMimeTypes = values.toArray(
-                            new String[values.size()]);
-                } else {
-                    compressionMimeTypes = null;
-                }
-
-                if (debug > 0) {
-                    System.out.println("compressionMimeTypes set to " +
-                            Arrays.toString(compressionMimeTypes));
-                }
-            }
+        } else {
+            compressionThreshold = 0;
         }
 
     }
@@ -147,7 +101,6 @@ public class CompressionFilter implements Filter {
     /**
     * Take this filter out of service.
     */
-    @Override
     public void destroy() {
 
         this.config = null;
@@ -170,7 +123,7 @@ public class CompressionFilter implements Filter {
      * It then invokes the next entity in the chain using the FilterChain object
      * (<code>chain.doFilter()</code>), <br>
      **/
-    @Override
+
     public void doFilter ( ServletRequest request, ServletResponse response,
                         FilterChain chain ) throws IOException, ServletException {
 
@@ -180,7 +133,7 @@ public class CompressionFilter implements Filter {
 
         if (compressionThreshold == 0) {
             if (debug > 0) {
-                System.out.println("doFilter got called, but compressionTreshold is set to 0 - no compression");
+                System.out.println("doFilter gets called, but compressionTreshold is set to 0 - no compression");
             }
             chain.doFilter(request, response);
             return;
@@ -193,7 +146,7 @@ public class CompressionFilter implements Filter {
             }
 
             // Are we allowed to compress ?
-            String s = ((HttpServletRequest)request).getParameter("gzip");
+            String s = (String) ((HttpServletRequest)request).getParameter("gzip");
             if ("false".equals(s)) {
                 if (debug > 0) {
                     System.out.println("got parameter gzip=false --> don't compress, just chain filter");
@@ -202,10 +155,10 @@ public class CompressionFilter implements Filter {
                 return;
             }
 
-            Enumeration<String> e =
+            Enumeration e =
                 ((HttpServletRequest)request).getHeaders("Accept-Encoding");
             while (e.hasMoreElements()) {
-                String name = e.nextElement();
+                String name = (String)e.nextElement();
                 if (name.indexOf("gzip") != -1) {
                     if (debug > 0) {
                         System.out.println("supports compression");
@@ -213,20 +166,24 @@ public class CompressionFilter implements Filter {
                     supportCompression = true;
                 } else {
                     if (debug > 0) {
-                        System.out.println("no support for compression");
+                        System.out.println("no support for compresion");
                     }
                 }
             }
         }
 
-        if (supportCompression) {
+        if (!supportCompression) {
+            if (debug > 0) {
+                System.out.println("doFilter gets called wo compression");
+            }
+            chain.doFilter(request, response);
+            return;
+        } else {
             if (response instanceof HttpServletResponse) {
                 CompressionServletResponseWrapper wrappedResponse =
                     new CompressionServletResponseWrapper((HttpServletResponse)response);
                 wrappedResponse.setDebugLevel(debug);
                 wrappedResponse.setCompressionThreshold(compressionThreshold);
-                wrappedResponse.setCompressionBuffer(compressionBuffer);
-                wrappedResponse.setCompressionMimeTypes(compressionMimeTypes);
                 if (debug > 0) {
                     System.out.println("doFilter gets called with compression");
                 }
@@ -237,12 +194,6 @@ public class CompressionFilter implements Filter {
                 }
                 return;
             }
-        } else {
-            if (debug > 0) {
-                System.out.println("doFilter gets called w/o compression");
-            }
-            chain.doFilter(request, response);
-            return;
         }
     }
 
