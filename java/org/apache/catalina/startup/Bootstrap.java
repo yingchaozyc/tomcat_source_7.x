@@ -162,9 +162,11 @@ public final class Bootstrap {
     // 类加载器初始化
     private void initClassLoaders() {
         try {
+        	// 创建common类加载器
             commonLoader = createClassLoader("common", null);
             if( commonLoader == null ) {
                 // no config file, default to this loader - we might be in a 'single' env.
+            	// 没有配置文件或者有傻逼乱删了这个配置项的话
                 commonLoader=this.getClass().getClassLoader();
             }
             catalinaLoader = createClassLoader("server", commonLoader);
@@ -223,7 +225,7 @@ public final class Bootstrap {
 
             // Local repository
             if (repository.endsWith("*.jar")) {
-            	// 如果是GLOB类型。则只保留他的目录即可
+            	// 如果是GLOB类型。则只保留他的目录即可。BLOB其实也就是这个意思。
                 repository = repository.substring(0, repository.length() - "*.jar".length());
                 repositories.add(new Repository(repository, RepositoryType.GLOB));
             } else if (repository.endsWith(".jar")) {
@@ -296,6 +298,7 @@ public final class Bootstrap {
     	// 初始化类加载器。
         initClassLoaders();
 
+        // 没明白下来两步设置类加载器的用意 TODO
         Thread.currentThread().setContextClassLoader(catalinaLoader);
 
         SecurityClassLoad.securityClassLoad(catalinaLoader);
@@ -303,6 +306,8 @@ public final class Bootstrap {
         // Load our startup class and call its process() method
         if (log.isDebugEnabled())
             log.debug("Loading startup class");
+        
+        // 准备反射调用，拿到Catalina的class实例
         Class<?> startupClass =
             catalinaLoader.loadClass
             ("org.apache.catalina.startup.Catalina");
@@ -311,17 +316,18 @@ public final class Bootstrap {
         // Set the shared extensions class loader
         if (log.isDebugEnabled())
             log.debug("Setting startup class properties");
+        
+        // 调用Catalina的setParentClassLoader方法设置Catalina的父加载器。
+        // TODO 这里需要思考为什么
         String methodName = "setParentClassLoader";
         Class<?> paramTypes[] = new Class[1];
         paramTypes[0] = Class.forName("java.lang.ClassLoader");
         Object paramValues[] = new Object[1];
         paramValues[0] = sharedLoader;
-        Method method =
-            startupInstance.getClass().getMethod(methodName, paramTypes);
+        Method method = startupInstance.getClass().getMethod(methodName, paramTypes);
         method.invoke(startupInstance, paramValues);
 
         catalinaDaemon = startupInstance;
-
     }
 
 
@@ -383,11 +389,14 @@ public final class Bootstrap {
 
     /**
      * Start the Catalina daemon.
+     * 
+     * 启动Catalina。 实际就是调用Catalina的start方法。
      */
     public void start()
         throws Exception {
         if( catalinaDaemon==null ) init();
 
+        // 这里的两个将null转型为Class[]的意义在哪里？ TODO
         Method method = catalinaDaemon.getClass().getMethod("start", (Class [] )null);
         method.invoke(catalinaDaemon, (Object [])null);
 
@@ -445,6 +454,8 @@ public final class Bootstrap {
 
     /**
      * Set flag.
+     * 
+     * 反射调用Catalina的setAwait方法
      */
     public void setAwait(boolean await)
         throws Exception {
@@ -459,6 +470,12 @@ public final class Bootstrap {
 
     }
 
+    /**
+     * 获取Catalina的await状态
+     * 
+     * @return
+     * @throws Exception
+     */
     public boolean getAwait()
         throws Exception
     {
@@ -527,11 +544,13 @@ public final class Bootstrap {
             } else if (command.equals("stopd")) {
                 args[args.length - 1] = "stop";
                 daemon.stop();
-            } else if (command.equals("start")) {
-                daemon.setAwait(true);
-                daemon.load(args);
+            } else if (command.equals("start")) { 
+            	// 关注点 启动
+                daemon.setAwait(true);		// 这里不明。	TODO
+                daemon.load(args);			// 这里简单的启动不涉及argument。 暂时忽略。 TODO
                 daemon.start();
-            } else if (command.equals("stop")) {
+            } else if (command.equals("stop")) { 
+            	// 关注点 停止
                 daemon.stopServer(args);
             } else if (command.equals("configtest")) {
                 daemon.load(args);

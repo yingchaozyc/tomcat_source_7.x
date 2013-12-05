@@ -72,8 +72,7 @@ public class Catalina {
     /**
      * The string manager for this package.
      */
-    protected static final StringManager sm =
-        StringManager.getManager(Constants.Package);
+    protected static final StringManager sm = StringManager.getManager(Constants.Package);
 
 
     // ----------------------------------------------------- Instance Variables
@@ -645,6 +644,7 @@ public class Catalina {
             load();
         }
 
+        // Server配置都没有还搞个毛啊
         if (getServer() == null) {
             log.fatal("Cannot start server. Server instance is not configured.");
             return;

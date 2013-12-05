@@ -44,6 +44,10 @@ import org.apache.juli.logging.LogFactory;
  * <li><code>ClassLoader</code> instance that should become the parent of
  *     the new class loader.</li>
  * </ul>
+ * 
+ * 工具类。负责Catalina的类加载器的创建。工厂方法需要下边的参数：
+ * 
+ * 回头补上，暂时没有彻底理解这块的意思 TODO
  *
  * @author Craig R. McClanahan
  * @version $Id: ClassLoaderFactory.java 1364147 2012-07-21 18:52:54Z markt $
@@ -135,6 +139,8 @@ public final class ClassLoaderFactory {
     /**
      * Create and return a new class loader, based on the configuration
      * defaults and the specified directory paths:
+     * 
+     * 类加载器创建。
      *
      * @param repositories List of class directories, jar files, jar directories
      *                     or URLS that should be added to the repositories of
@@ -216,7 +222,8 @@ public final class ClassLoaderFactory {
             for (int i = 0; i < array.length; i++) {
                 log.debug("  location " + i + " is " + array[i]);
             }
-
+        
+        // TODO  AccessController.doPrivileged  & PrivilegedAction 这两个东西交叉在一起用一直不懂
         return AccessController.doPrivileged(
                 new PrivilegedAction<URLClassLoader>() {
                     @Override
