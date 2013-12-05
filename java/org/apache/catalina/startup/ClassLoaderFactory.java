@@ -267,6 +267,9 @@ public final class ClassLoaderFactory {
         return true;
     }
 
+    /**
+     *  定义了一个简单的枚举类。
+     */
     public static enum RepositoryType {
         DIR,
         GLOB,
@@ -274,6 +277,9 @@ public final class ClassLoaderFactory {
         URL
     }
 
+	/**
+	 *  定义了一个简单的仓库类。 只有两个属性。位置 & 类型。
+	 */
     public static class Repository {
         private final String location;
         private final RepositoryType type;

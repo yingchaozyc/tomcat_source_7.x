@@ -159,7 +159,7 @@ public final class Bootstrap {
 
     // -------------------------------------------------------- Private Methods
 
-
+    // 类加载器初始化
     private void initClassLoaders() {
         try {
             commonLoader = createClassLoader("common", null);
@@ -170,6 +170,7 @@ public final class Bootstrap {
             catalinaLoader = createClassLoader("server", commonLoader);
             sharedLoader = createClassLoader("shared", commonLoader);
         } catch (Throwable t) {
+        	// TODO 没有明白这里的异常处理方案。为什么要这么做。
             handleThrowable(t);
             log.error("Class loader creation threw exception", t);
             
@@ -179,26 +180,42 @@ public final class Bootstrap {
     }
 
 
+    /**
+     * 类加载器创建。
+     * 
+     * @param name		标识名称。定义在catalina.properties. 有common，server，share三种。但是实际上在tomcat7中只用到了common。
+     * @param parent	父类加载器。如果没有定义的话则用这个。
+     * @return
+     * @throws Exception
+     */
     private ClassLoader createClassLoader(String name, ClassLoader parent)
         throws Exception {
-
+    	
+    	// 在tomcat7中。已经废弃了server & share的类加载器模式，只保留common的类加载器模式
+    	// common.loader = "${catalina.base}/lib","${catalina.base}/lib/*.jar","${catalina.home}/lib","${catalina.home}/lib/*.jar"
+    	// server.loader = ''
+    	// share.loader  = ''
         String value = CatalinaProperties.getProperty(name + ".loader");
         if ((value == null) || (value.equals("")))
             return parent;
-
+        
+        // 环境变量替换。 比如上边的common.loader会被替换成
+        // "D:\software\opensource-code\tomcat_source_7.x/lib","D:\software\opensource-code\tomcat_source_7.x/lib/*.jar",
+        // "D:\software\opensource-code\tomcat_source_7.x/lib","D:\software\opensource-code\tomcat_source_7.x/lib/*.jar"
         value = replace(value);
 
         List<Repository> repositories = new ArrayList<>();
 
+        // 转换成字符List。
         String[] repositoryPaths = getPaths(value);
 
         for (String repository : repositoryPaths) {
             // Check for a JAR URL repository
+        	// 判断类加载器路径是否是URL类型的，这样的判断其实有点怪异。如果发生异常忽略继续
             try {
                 @SuppressWarnings("unused")
                 URL url = new URL(repository);
-                repositories.add(
-                        new Repository(repository, RepositoryType.URL));
+                repositories.add(new Repository(repository, RepositoryType.URL));
                 continue;
             } catch (MalformedURLException e) {
                 // Ignore
@@ -206,25 +223,25 @@ public final class Bootstrap {
 
             // Local repository
             if (repository.endsWith("*.jar")) {
-                repository = repository.substring
-                    (0, repository.length() - "*.jar".length());
-                repositories.add(
-                        new Repository(repository, RepositoryType.GLOB));
+            	// 如果是GLOB类型。则只保留他的目录即可
+                repository = repository.substring(0, repository.length() - "*.jar".length());
+                repositories.add(new Repository(repository, RepositoryType.GLOB));
             } else if (repository.endsWith(".jar")) {
-                repositories.add(
-                        new Repository(repository, RepositoryType.JAR));
+                repositories.add(new Repository(repository, RepositoryType.JAR));
             } else {
-                repositories.add(
-                        new Repository(repository, RepositoryType.DIR));
+                repositories.add(new Repository(repository, RepositoryType.DIR));
             }
         }
-
+        
+        // 创建类加载器。
         return ClassLoaderFactory.createClassLoader(repositories, parent);
     }
 
 
     /**
      * System property replacement in the given string.
+     *  
+     * 当前方法会将环境变量替换为真实的绝对路径。 
      *
      * @param str The original string
      * @return the modified string
@@ -271,9 +288,12 @@ public final class Bootstrap {
 
     /**
      * Initialize daemon.
+     * 
+     * 初始化daemon， 也就是Bootstrap。
      */
     public void init() throws Exception {
 
+    	// 初始化类加载器。
         initClassLoaders();
 
         Thread.currentThread().setContextClassLoader(catalinaLoader);
@@ -465,14 +485,17 @@ public final class Bootstrap {
      * Main method and entry point when starting Tomcat via the provided
      * scripts.
      *
+     * 启动主入口
+     * 
      * @param args Command line arguments to be processed
      */
-    public static void main(String args[]) {
-
+    public static void main(String args[]) { 
+    	// tomcat开始启动
         if (daemon == null) {
-            // Don't set daemon until init() has completed
+            // Don't set daemon until init() has completed 
             Bootstrap bootstrap = new Bootstrap();
             try {
+            	// bootstrap初始化
                 bootstrap.init();
             } catch (Throwable t) {
                 handleThrowable(t);
@@ -484,6 +507,10 @@ public final class Bootstrap {
             // When running as a service the call to stop will be on a new
             // thread so make sure the correct class loader is used to prevent
             // a range of class not found exceptions.
+        	//
+        	// tomcat已经在启动中。 此时调用main方法可能是一些其他的操作，比如说，关闭。
+        	// 关闭时候需要保持ClassLoader的一致，所以设置当前线程的上下文类加载器为
+        	// 之前dameon的类加载器，防止抛出class not found。
             Thread.currentThread().setContextClassLoader(daemon.catalinaLoader);
         }
 
@@ -568,6 +595,11 @@ public final class Bootstrap {
 
 
     // Copied from ExceptionUtils since that class is not visible during start
+    // 异常处理方法，从ExceptionUtils拷贝而来。因为在初始化的时候还没有加载这个类，所以暂时这个类
+    // 的方法对于Bootstrap是不可见的。
+    //
+    // 只对于极度错误的情况才会抛出异常信息。比如线程僵死，OOM， 栈溢出等等。
+    // 其他情况下异常将直接被吞掉。并且不会告诉调用方。
     private static void handleThrowable(Throwable t) {
         if (t instanceof ThreadDeath) {
             throw (ThreadDeath) t;
@@ -580,6 +612,7 @@ public final class Bootstrap {
 
 
     // Protected for unit testing
+    // 将类加载器地址转换为地址列表。
     protected static String[] getPaths(String value) {
 
         List<String> result = new ArrayList<>();
