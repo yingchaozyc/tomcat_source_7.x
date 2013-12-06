@@ -36,19 +36,24 @@ public abstract class LifecycleBase implements Lifecycle {
 
     private static final Log log = LogFactory.getLog(LifecycleBase.class);
 
-    private static final StringManager sm =
-        StringManager.getManager("org.apache.catalina.util");
+    private static final StringManager sm = StringManager.getManager("org.apache.catalina.util");
 
 
     /**
      * Used to handle firing lifecycle events.
      * TODO: Consider merging LifecycleSupport into this class.
+     * 
+     * 用来处理lifecycle事件。
+     * PS: 需要搞清楚的一点是，LifecycleBase下边有很多组件子类，当他们调用到本类时。
+     * 	   这里的this应该是子类的实例。
      */
     private final LifecycleSupport lifecycle = new LifecycleSupport(this);
 
 
     /**
      * The current state of the source component.
+     * 
+     * 默认的生命周期是NEW状态，也就是新建
      */
     private volatile LifecycleState state = LifecycleState.NEW;
 
@@ -90,17 +95,23 @@ public abstract class LifecycleBase implements Lifecycle {
         lifecycle.fireLifecycleEvent(type, data);
     }
 
-
+    /**
+     * 组件初始化
+     */
     @Override
     public final synchronized void init() throws LifecycleException {
+    	// 无效的状态流转。直接抛出异常来。新初始化的状态必须是new。
         if (!state.equals(LifecycleState.NEW)) {
             invalidTransition(Lifecycle.BEFORE_INIT_EVENT);
         }
+        
+        // 发送组件初始化中的事件(before_init)。看谁感兴趣，谁去响应
         setStateInternal(LifecycleState.INITIALIZING, null, false);
 
         try {
             initInternal();
         } catch (Throwable t) {
+        	// 这里的异常处理还是不明白 TODO
             ExceptionUtils.handleThrowable(t);
             setStateInternal(LifecycleState.FAILED, null, false);
             throw new LifecycleException(
@@ -403,6 +414,12 @@ public abstract class LifecycleBase implements Lifecycle {
         }
     }
 
+    /**
+     * 无效的状态流转。直接抛出异常来
+     * 
+     * @param type
+     * @throws LifecycleException
+     */
     private void invalidTransition(String type) throws LifecycleException {
         String msg = sm.getString("lifecycleBase.invalidTransition", type,
                 toString(), state);

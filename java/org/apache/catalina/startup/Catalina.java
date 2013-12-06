@@ -84,6 +84,8 @@ public class Catalina {
 
     /**
      * Pathname to the server configuration file.
+     * 
+     * 固定的核心配置文件server.xml的位置。
      */
     protected String configFile = "conf/server.xml";
 
@@ -91,8 +93,7 @@ public class Catalina {
     /**
      * The shared extensions class loader for this server.
      */
-    protected ClassLoader parentClassLoader =
-        Catalina.class.getClassLoader();
+    protected ClassLoader parentClassLoader = Catalina.class.getClassLoader();
 
 
     /**
@@ -247,6 +248,8 @@ public class Catalina {
 
     /**
      * Return a File object representing our configuration file.
+     * 
+     * 返回配置文件的绝对路径。
      */
     protected File configFile() {
 
@@ -261,6 +264,8 @@ public class Catalina {
 
     /**
      * Create and configure the Digester we will be using for startup.
+     * 
+     * 创建XML解析器。这段实际上tomcat是copy了common-digester的代码。
      */
     protected Digester createStartDigester() {
         long t1=System.currentTimeMillis();
@@ -501,24 +506,29 @@ public class Catalina {
 
     /**
      * Start a new server instance.
+     * 
+     * 启动一个server实例。
      */
     public void load() {
 
         long t1 = System.nanoTime();
 
+        // 看当前的临时目录是否在正常状态。如果否会有异常日志打出。
         initDirs();
 
         // Before digester - it may be needed
-
+        // FIXME JNDI初始化。这部分我暂时先忽略掉。 
         initNaming();
 
         // Create and execute our Digester
+        // 创建XML解析器。这段实际上tomcat是copy了common-digester的代码。
         Digester digester = createStartDigester();
 
         InputSource inputSource = null;
         InputStream inputStream = null;
         File file = null;
         try {
+        	// 拿到绝对路径的核心配置文件
             file = configFile();
             inputStream = new FileInputStream(file);
             inputSource = new InputSource(file.toURI().toURL().toString());
@@ -527,23 +537,24 @@ public class Catalina {
                 log.debug(sm.getString("catalina.configFail", file), e);
             }
         }
+        
+        // 如果在规定的conf目录没有发现server.xml
         if (inputStream == null) {
             try {
-                inputStream = getClass().getClassLoader()
-                    .getResourceAsStream(getConfigFile());
-                inputSource = new InputSource
-                    (getClass().getClassLoader()
-                     .getResource(getConfigFile()).toString());
+            	// 尝试在当前类路径下继续查找
+                inputStream = getClass().getClassLoader().getResourceAsStream(getConfigFile());
+                
+                inputSource = new InputSource(getClass().getClassLoader().getResource(getConfigFile()).toString());
             } catch (Exception e) {
                 if (log.isDebugEnabled()) {
-                    log.debug(sm.getString("catalina.configFail",
-                            getConfigFile()), e);
+                    log.debug(sm.getString("catalina.configFail", getConfigFile()), e);
                 }
             }
         }
 
         // This should be included in catalina.jar
         // Alternative: don't bother with xml, just create it manually.
+        // 不明白这里的思路 TODO 虽然一般也走不到这里
         if( inputStream==null ) {
             try {
                 inputStream = getClass().getClassLoader()
@@ -559,7 +570,7 @@ public class Catalina {
             }
         }
 
-
+        // 还TM是空，那我就不管了 打印warn级别异常
         if (inputStream == null || inputSource == null) {
             if  (file == null) {
                 log.warn(sm.getString("catalina.configFail",
@@ -575,8 +586,12 @@ public class Catalina {
         }
 
         try {
+        	// 这里不明白的一点是 digester.parse()明明可以解析file类型的数据，为什么这里非要流数据？
+        	// TODO
             inputSource.setByteStream(inputStream);
             digester.push(this);
+            
+            // 组装。StandardServer， StandardHost .... 就在这里生成了。
             digester.parse(inputSource);
         } catch (SAXParseException spe) {
             log.warn("Catalina.start using " + getConfigFile() + ": " +
@@ -586,6 +601,7 @@ public class Catalina {
             log.warn("Catalina.start using " + getConfigFile() + ": " , e);
             return;
         } finally {
+        	// 习惯性的关闭流。
             try {
                 inputStream.close();
             } catch (IOException e) {
@@ -593,17 +609,25 @@ public class Catalina {
             }
         }
 
+        // 将catalina的当前引用放到server， 后续server还需要这里边的一些值和方法
         getServer().setCatalina(this);
+        
+        // 设置环境变量
         getServer().setCatalinaHome(Bootstrap.getCatalinaHomeFile());
         getServer().setCatalinaBase(Bootstrap.getCatalinaBaseFile());
 
         // Stream redirection
-        initStreams();
+        // 流的重定向。System.Out.Println() & System.err.println() 可以直接被输出到屏幕上
+        initStreams(); 
 
         // Start the new server
         try {
             getServer().init();
         } catch (LifecycleException e) {
+        	// 当环境变量设置了org.apache.catalina.startup.EXIT_ON_INIT_FAILURE = true
+        	// 代表需要当初始化错误的时候扔出系统错误
+        	// 否则只是打印一个简单的日志就好
+        	// TODO 这里的想法依然需要琢磨
             if (Boolean.getBoolean("org.apache.catalina.startup.EXIT_ON_INIT_FAILURE")) {
                 throw new java.lang.Error(e);
             } else {
@@ -611,7 +635,8 @@ public class Catalina {
             }
 
         }
-
+        
+        // TODO System.nanoTime() & System.currentTimeMills()的区别？
         long t2 = System.nanoTime();
         if(log.isInfoEnabled()) {
             log.info("Initialization processed in " + ((t2 - t1) / 1000000) + " ms");
@@ -760,7 +785,10 @@ public class Catalina {
 
     }
 
-
+    /**
+     * 目录初始化。
+     * 这里做的实际的工作其实就是看当前的临时目录是否在正常状态。
+     */
     protected void initDirs() {
         String temp = System.getProperty("java.io.tmpdir");
         if (temp == null || (!(new File(temp)).exists())
@@ -769,7 +797,11 @@ public class Catalina {
         }
     }
 
-
+    /**
+     * 流的重定向。System.Out.Println() & System.err.println() 可以直接被输出到屏幕上
+     * 
+     * *** 学习点 ***
+     */
     protected void initStreams() {
         // Replace System.out and System.err with a custom PrintStream
         System.setOut(new SystemLogHandler(System.out));

@@ -20,6 +20,10 @@ package org.apache.catalina;
 /**
  * The list of valid states for components that implement {@link Lifecycle}.
  * See {@link Lifecycle} for the state transition diagram.
+ * 
+ * <p>
+ * 		catalina组件状态一览。状态流转可见{@link Lifecycle}.
+ * </p>
  */
 public enum LifecycleState {
     NEW(false, null),

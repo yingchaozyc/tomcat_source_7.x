@@ -333,6 +333,8 @@ public final class Bootstrap {
 
     /**
      * Load daemon.
+     * 
+     * 调用Catalina的load方法。
      */
     private void load(String[] arguments)
         throws Exception {
@@ -547,7 +549,7 @@ public final class Bootstrap {
             } else if (command.equals("start")) { 
             	// 关注点 启动
                 daemon.setAwait(true);		// 这里不明。	TODO
-                daemon.load(args);			// 这里简单的启动不涉及argument。 暂时忽略。 TODO
+                daemon.load(args);			 
                 daemon.start();
             } else if (command.equals("stop")) { 
             	// 关注点 停止

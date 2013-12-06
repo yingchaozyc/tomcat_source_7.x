@@ -28,6 +28,8 @@ import java.util.Stack;
  * A stack is implemented per Thread so that nested startCapture
  * and stopCapture can be used.
  *
+ * 系统日志处理器。还有其他功能，我们后续再说。
+ * 
  * @author Remy Maucherat
  * @author Glenn L. Nielsen
  */
