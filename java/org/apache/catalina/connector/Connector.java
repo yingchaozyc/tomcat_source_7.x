@@ -919,8 +919,7 @@ public class Connector extends LifecycleMBeanBase  {
         try {
             protocolHandler.pause();
         } catch (Exception e) {
-            log.error(sm.getString
-                      ("coyoteConnector.protocolHandlerPauseFailed"), e);
+            log.error(sm.getString("coyoteConnector.protocolHandlerPauseFailed"), e);
         }
     }
 
@@ -932,15 +931,17 @@ public class Connector extends LifecycleMBeanBase  {
         try {
             protocolHandler.resume();
         } catch (Exception e) {
-            log.error(sm.getString
-                      ("coyoteConnector.protocolHandlerResumeFailed"), e);
+            log.error(sm.getString("coyoteConnector.protocolHandlerResumeFailed"), e);
         }
     }
 
-
+    /**
+     * Connect连接器初始化。
+     */
     @Override
     protected void initInternal() throws LifecycleException {
-
+    	
+    	// MBean初始化
         super.initInternal();
 
         // Initialize adapter
@@ -952,19 +953,15 @@ public class Connector extends LifecycleMBeanBase  {
             setParseBodyMethods(getParseBodyMethods());
         }
 
-        if (protocolHandler.isAprRequired() &&
-                !AprLifecycleListener.isAprAvailable()) {
-            throw new LifecycleException(
-                    sm.getString("coyoteConnector.protocolHandlerNoApr",
-                            getProtocolHandlerClassName()));
+        if (protocolHandler.isAprRequired() && !AprLifecycleListener.isAprAvailable()) {
+            throw new LifecycleException(sm.getString("coyoteConnector.protocolHandlerNoApr", getProtocolHandlerClassName()));
         }
 
         try {
+        	// Connector核心的初始化过程
             protocolHandler.init();
         } catch (Exception e) {
-            throw new LifecycleException
-                (sm.getString
-                 ("coyoteConnector.protocolHandlerInitializationFailed"), e);
+            throw new LifecycleException(sm.getString("coyoteConnector.protocolHandlerInitializationFailed"), e);
         }
     }
 
@@ -979,8 +976,7 @@ public class Connector extends LifecycleMBeanBase  {
 
         // Validate settings before starting
         if (getPort() < 0) {
-            throw new LifecycleException(sm.getString(
-                    "coyoteConnector.invalidPort", Integer.valueOf(getPort())));
+            throw new LifecycleException(sm.getString("coyoteConnector.invalidPort", Integer.valueOf(getPort())));
         }
 
         setState(LifecycleState.STARTING);
@@ -993,9 +989,7 @@ public class Connector extends LifecycleMBeanBase  {
                 errPrefix += "service.getName(): \"" + this.service.getName() + "\"; ";
             }
 
-            throw new LifecycleException
-                (errPrefix + " " + sm.getString
-                 ("coyoteConnector.protocolHandlerStartFailed"), e);
+            throw new LifecycleException(errPrefix + " " + sm.getString("coyoteConnector.protocolHandlerStartFailed"), e);
         }
     }
 
@@ -1013,9 +1007,7 @@ public class Connector extends LifecycleMBeanBase  {
         try {
             protocolHandler.stop();
         } catch (Exception e) {
-            throw new LifecycleException
-                (sm.getString
-                 ("coyoteConnector.protocolHandlerStopFailed"), e);
+            throw new LifecycleException(sm.getString("coyoteConnector.protocolHandlerStopFailed"), e);
         }
     }
 
@@ -1025,9 +1017,7 @@ public class Connector extends LifecycleMBeanBase  {
         try {
             protocolHandler.destroy();
         } catch (Exception e) {
-            throw new LifecycleException
-                (sm.getString
-                 ("coyoteConnector.protocolHandlerDestroyFailed"), e);
+            throw new LifecycleException(sm.getString("coyoteConnector.protocolHandlerDestroyFailed"), e);
         }
 
         if (getService() != null) {

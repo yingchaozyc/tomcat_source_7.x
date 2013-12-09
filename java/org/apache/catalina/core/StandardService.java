@@ -545,6 +545,7 @@ public class StandardService extends LifecycleMBeanBase implements Service {
 
         super.initInternal();
 
+        // 初始化子节点engine  server -> service -> engine
         if (container != null) {
             container.init();
         }
@@ -566,8 +567,7 @@ public class StandardService extends LifecycleMBeanBase implements Service {
                 try {
                     connector.init();
                 } catch (Exception e) {
-                    String message = sm.getString(
-                            "standardService.connector.initFailed", connector);
+                    String message = sm.getString("standardService.connector.initFailed", connector);
                     log.error(message, e);
 
                     if (Boolean.getBoolean("org.apache.catalina.startup.EXIT_ON_INIT_FAILURE"))

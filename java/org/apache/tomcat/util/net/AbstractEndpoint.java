@@ -275,6 +275,11 @@ public abstract class AbstractEndpoint<S> {
      * binds the port on {@link #init()} and unbinds it on {@link #destroy()}.
      * If set to <code>false</code> the port is bound on {@link #start()} and
      * unbound on {@link #stop()}.
+     * 
+     * <p>
+     * 		控制了什么时候去绑定端口。默认是true。从名字就能看出是在调用init方法的时候去绑定。
+     * 		如果被设置为false。 则是在start()的时候才去绑定。
+     * </p>
      */
     private boolean bindOnInit = true;
     public boolean getBindOnInit() { return bindOnInit; }
@@ -416,6 +421,8 @@ public abstract class AbstractEndpoint<S> {
 
     /**
      * Priority of the worker threads.
+     * 
+     * 线程优先级。
      */
     protected int threadPriority = Thread.NORM_PRIORITY;
     public void setThreadPriority(int threadPriority) { this.threadPriority = threadPriority; }
@@ -695,8 +702,11 @@ public abstract class AbstractEndpoint<S> {
     public abstract void stopInternal() throws Exception;
 
     public final void init() throws Exception {
+    	// 系统设置了在调用init()方法时候绑定端口
         if (bindOnInit) {
             bind();
+            // 标记什么什么时候绑定的。枚举。
+            // TODO 通过bindOnInit貌似就能区别了呀。何必多这个参数。
             bindState = BindState.BOUND_ON_INIT;
         }
     }

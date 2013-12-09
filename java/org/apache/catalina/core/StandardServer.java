@@ -777,7 +777,7 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
      */
     @Override
     protected void initInternal() throws LifecycleException {
-
+ 
         super.initInternal();
 
         // Register global String cache
@@ -797,7 +797,8 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
         // Populate the extension validator with JARs from common and shared
         // class loaders
         if (getCatalina() != null) {
-            ClassLoader cl = getCatalina().getParentClassLoader();
+        	// shareLoader。 在Bootstrap中设置过。
+            ClassLoader cl = getCatalina().getParentClassLoader();	
             // Walk the class loader hierarchy. Stop at the system class loader.
             // This will add the shared (if present) and common class loaders
             while (cl != null && cl != ClassLoader.getSystemClassLoader()) {
@@ -818,10 +819,14 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
                         }
                     }
                 }
+                
+                // 这一步是在做什么 ？？？ TODO
                 cl = cl.getParent();
             }
         }
+        
         // Initialize our defined Services
+        // 启动子节点service。   
         for (int i = 0; i < services.length; i++) {
             services[i].init();
         }

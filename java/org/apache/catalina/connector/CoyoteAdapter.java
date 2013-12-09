@@ -90,7 +90,7 @@ public class CoyoteAdapter implements Adapter {
                     return Thread.currentThread().getName();
                 }
 
-    };
+    		};
 
     // ----------------------------------------------------------- Constructors
 
@@ -120,8 +120,7 @@ public class CoyoteAdapter implements Adapter {
     /**
      * The string manager for this package.
      */
-    protected static final StringManager sm =
-        StringManager.getManager(Constants.Package);
+    protected static final StringManager sm = StringManager.getManager(Constants.Package);
 
 
     /**

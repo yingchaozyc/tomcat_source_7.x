@@ -209,6 +209,8 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
 
     /**
      * Poller thread count.
+     * 
+     * 轮询线程数目。
      */
     private int pollerThreadCount = Math.min(2,Runtime.getRuntime().availableProcessors());
     public void setPollerThreadCount(int pollerThreadCount) { this.pollerThreadCount = pollerThreadCount; }
@@ -384,7 +386,8 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
             enabledProtocols = sslUtil.getEnableableProtocols(sslContext);
         }
 
-        if (oomParachute>0) reclaimParachute(true);
+        if (oomParachute>0) 
+        	reclaimParachute(true);
         selectorPool.open();
     }
 
@@ -425,7 +428,7 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
                 pollers[i] = new Poller();
                 Thread pollerThread = new Thread(pollers[i], getName() + "-ClientPoller-"+i);
                 pollerThread.setPriority(threadPriority);
-                pollerThread.setDaemon(true);
+                pollerThread.setDaemon(true);				// 后台线程！
                 pollerThread.start();
             }
 

@@ -191,9 +191,8 @@ public final class Bootstrap {
      * @throws Exception
      */
     private ClassLoader createClassLoader(String name, ClassLoader parent)
-        throws Exception {
+        throws Exception {  
     	
-    	// 在tomcat7中。已经废弃了server & share的类加载器模式，只保留common的类加载器模式
     	// common.loader = "${catalina.base}/lib","${catalina.base}/lib/*.jar","${catalina.home}/lib","${catalina.home}/lib/*.jar"
     	// server.loader = ''
     	// share.loader  = ''
@@ -317,7 +316,7 @@ public final class Bootstrap {
         if (log.isDebugEnabled())
             log.debug("Setting startup class properties");
         
-        // 调用Catalina的setParentClassLoader方法设置Catalina的父加载器。
+        // 调用Catalina的setParentClassLoader方法设置Catalina的父加载器为shareLoader。
         // TODO 这里需要思考为什么
         String methodName = "setParentClassLoader";
         Class<?> paramTypes[] = new Class[1];

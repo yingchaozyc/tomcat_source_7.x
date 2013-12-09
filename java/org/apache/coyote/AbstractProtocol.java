@@ -44,14 +44,12 @@ import org.apache.tomcat.util.net.SocketStatus;
 import org.apache.tomcat.util.net.SocketWrapper;
 import org.apache.tomcat.util.res.StringManager;
 
-public abstract class AbstractProtocol<S> implements ProtocolHandler,
-        MBeanRegistration {
+public abstract class AbstractProtocol<S> implements ProtocolHandler, MBeanRegistration {
 
     /**
      * The string manager for this package.
      */
-    protected static final StringManager sm =
-        StringManager.getManager(Constants.Package);
+    protected static final StringManager sm = StringManager.getManager(Constants.Package);
 
 
     /**
@@ -133,7 +131,9 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
      * usually be closer to {@link #getMaxThreads()}.
      */
     protected int processorCache = 200;
+    
     public int getProcessorCache() { return this.processorCache; }
+    
     public void setProcessorCache(int processorCache) {
         this.processorCache = processorCache;
     }
@@ -149,10 +149,11 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
      * default provider will be used.
      */
     protected String clientCertProvider = null;
+    
     public String getClientCertProvider() { return clientCertProvider; }
+    
     public void setClientCertProvider(String s) { this.clientCertProvider = s; }
-
-
+ 
     @Override
     public boolean isAprRequired() {
         return false;
@@ -420,43 +421,35 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
     @Override
     public void init() throws Exception {
         if (getLog().isInfoEnabled())
-            getLog().info(sm.getString("abstractProtocolHandler.init",
-                    getName()));
+            getLog().info(sm.getString("abstractProtocolHandler.init", getName()));
 
         if (oname == null) {
             // Component not pre-registered so register it
             oname = createObjectName();
             if (oname != null) {
-                Registry.getRegistry(null, null).registerComponent(this, oname,
-                    null);
+                Registry.getRegistry(null, null).registerComponent(this, oname, null);
             }
         }
 
         if (this.domain != null) {
             try {
-                tpOname = new ObjectName(domain + ":" +
-                        "type=ThreadPool,name=" + getName());
-                Registry.getRegistry(null, null).registerComponent(endpoint,
-                        tpOname, null);
+                tpOname = new ObjectName(domain + ":" + "type=ThreadPool,name=" + getName());
+                Registry.getRegistry(null, null).registerComponent(endpoint, tpOname, null);
             } catch (Exception e) {
-                getLog().error(sm.getString(
-                        "abstractProtocolHandler.mbeanRegistrationFailed",
-                        tpOname, getName()), e);
+                getLog().error(sm.getString("abstractProtocolHandler.mbeanRegistrationFailed", tpOname, getName()), e);
             }
-            rgOname=new ObjectName(domain +
-                    ":type=GlobalRequestProcessor,name=" + getName());
-            Registry.getRegistry(null, null).registerComponent(
-                    getHandler().getGlobal(), rgOname, null );
+            rgOname=new ObjectName(domain + ":type=GlobalRequestProcessor,name=" + getName());
+            Registry.getRegistry(null, null).registerComponent(getHandler().getGlobal(), rgOname, null );
         }
 
         String endpointName = getName();
         endpoint.setName(endpointName.substring(1, endpointName.length()-1));
 
+        // 好了，上边的JMX初始化处理终于结束了。开始我们正式的Connector初始化过程。
         try {
             endpoint.init();
         } catch (Exception ex) {
-            getLog().error(sm.getString("abstractProtocolHandler.initError",
-                    getName()), ex);
+            getLog().error(sm.getString("abstractProtocolHandler.initError", getName()), ex);
             throw ex;
         }
     }
