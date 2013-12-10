@@ -104,6 +104,8 @@ public class Catalina {
 
     /**
      * Use shutdown hook flag.
+     * 
+     * 关闭钩子标记。
      */
     protected boolean useShutdownHook = true;
 
@@ -622,6 +624,7 @@ public class Catalina {
 
         // Start the new server
         try {
+        	// 初始化。里边又初始化了一大坨东西。特别是Connector的初始化过程。
             getServer().init();
         } catch (LifecycleException e) {
         	// 当环境变量设置了org.apache.catalina.startup.EXIT_ON_INIT_FAILURE = true
@@ -662,9 +665,12 @@ public class Catalina {
 
     /**
      * Start a new server instance.
+     * 
+     * 正式启动入口
      */
     public void start() {
-
+    	
+    	// 都要启动了如果还没有server，再尝试去加载一次
         if (getServer() == null) {
             load();
         }
@@ -707,8 +713,7 @@ public class Catalina {
             // if JULI's hook completes before the CatalinaShutdownHook()
             LogManager logManager = LogManager.getLogManager();
             if (logManager instanceof ClassLoaderLogManager) {
-                ((ClassLoaderLogManager) logManager).setUseShutdownHook(
-                        false);
+                ((ClassLoaderLogManager) logManager).setUseShutdownHook(false);
             }
         }
 

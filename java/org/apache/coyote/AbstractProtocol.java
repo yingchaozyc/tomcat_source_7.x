@@ -458,13 +458,11 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler, MBeanRegis
     @Override
     public void start() throws Exception {
         if (getLog().isInfoEnabled())
-            getLog().info(sm.getString("abstractProtocolHandler.start",
-                    getName()));
+            getLog().info(sm.getString("abstractProtocolHandler.start", getName()));
         try {
             endpoint.start();
         } catch (Exception ex) {
-            getLog().error(sm.getString("abstractProtocolHandler.startError",
-                    getName()), ex);
+            getLog().error(sm.getString("abstractProtocolHandler.startError", getName()), ex);
             throw ex;
         }
     }

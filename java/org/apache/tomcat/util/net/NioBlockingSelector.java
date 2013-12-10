@@ -43,12 +43,12 @@ public class NioBlockingSelector {
 
     private static int threadCounter = 0;
 
-    private final SynchronizedStack<KeyReference> keyReferenceStack =
-            new SynchronizedStack<>();
+    private final SynchronizedStack<KeyReference> keyReferenceStack = new SynchronizedStack<>();
 
     protected Selector sharedSelector;
 
     protected BlockPoller poller;
+    
     public NioBlockingSelector() {
 
     }
@@ -215,10 +215,10 @@ public class NioBlockingSelector {
     protected static class BlockPoller extends Thread {
         protected volatile boolean run = true;
         protected Selector selector = null;
-        protected final SynchronizedQueue<Runnable> events =
-                new SynchronizedQueue<>();
+        protected final SynchronizedQueue<Runnable> events = new SynchronizedQueue<>();
         public void disable() { run = false; selector.wakeup();}
         protected final AtomicInteger wakeupCounter = new AtomicInteger(0);
+        
         public void cancelKey(final SelectionKey key) {
             Runnable r = new Runnable() {
                 @Override

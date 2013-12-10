@@ -1,12 +1,11 @@
-package com.alibaba.tomcat.test.nio.test;
+package com.alibaba.tomcat.test.nio;
    
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel; 
-import java.nio.channels.SocketChannel;
-import java.nio.charset.Charset;
+import java.nio.channels.SocketChannel; 
 import java.util.Iterator; 
 
 public class Test4 {
@@ -35,20 +34,28 @@ public class Test4 {
 					
 					ServerSocketChannel serverSocketChannel = (ServerSocketChannel) tmpKey.channel();
 					SocketChannel socketChannel = serverSocketChannel.accept();
-		            Charset charset = Charset.defaultCharset();  
-		            String data = "S : " + System.currentTimeMillis();  
-		            ByteBuffer byteBuffer = charset.encode(data);  
-		            int limit = byteBuffer.limit();  
-		            byteBuffer.clear();  
-		            byteBuffer.position(limit);  
-		            byteBuffer.put((byte)'\n');  
-		            byteBuffer.flip();  
-		            while(byteBuffer.hasRemaining()){  
-		                socketChannel.write(byteBuffer);  
-		            }   
+		            
 					
-					//socketChannel.write(ByteBuffer.wrap("服务器回复:我管坯里!".getBytes())); 
+					socketChannel.write(ByteBuffer.wrap("use java nio!".getBytes()));
+					socketChannel.configureBlocking(false);
+					socketChannel.register(selector, SelectionKey.OP_READ);	
 				} 
+				
+				if(tmpKey.isReadable()){
+					SocketChannel socketChannel = (SocketChannel) tmpKey.channel();
+
+					
+					ByteBuffer buffer = ByteBuffer.allocate(102400);
+					
+					socketChannel.read(buffer);
+					buffer.flip();
+					
+					StringBuffer str = new StringBuffer();
+					while(buffer.hasRemaining()){
+						str.append((char)buffer.get());
+					}  
+					System.out.println("server get info :" + str);
+				}
 				
 				it.remove();  
 			}

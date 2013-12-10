@@ -198,12 +198,17 @@ public class SocketProperties {
         if (tcpNoDelay != null)
             socket.setTcpNoDelay(tcpNoDelay.booleanValue());
     }
-
+    
+    /**
+     * 设置socket连接属性。一些和HTTP相关的属性。
+     * 
+     * @param socket
+     * @throws SocketException
+     */
     public void setProperties(ServerSocket socket) throws SocketException{
         if (rxBufSize != null)
             socket.setReceiveBufferSize(rxBufSize.intValue());
-        if (performanceConnectionTime != null && performanceLatency != null &&
-                performanceBandwidth != null)
+        if (performanceConnectionTime != null && performanceLatency != null && performanceBandwidth != null)
             socket.setPerformancePreferences(
                     performanceConnectionTime.intValue(),
                     performanceLatency.intValue(),

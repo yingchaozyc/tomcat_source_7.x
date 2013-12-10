@@ -968,6 +968,7 @@ public class Connector extends LifecycleMBeanBase  {
 
     /**
      * Begin processing requests via this Connector.
+     * 核心的连接器启动过程。
      *
      * @exception LifecycleException if a fatal startup error occurs
      */
@@ -975,6 +976,7 @@ public class Connector extends LifecycleMBeanBase  {
     protected void startInternal() throws LifecycleException {
 
         // Validate settings before starting
+    	// 无效端口
         if (getPort() < 0) {
             throw new LifecycleException(sm.getString("coyoteConnector.invalidPort", Integer.valueOf(getPort())));
         }

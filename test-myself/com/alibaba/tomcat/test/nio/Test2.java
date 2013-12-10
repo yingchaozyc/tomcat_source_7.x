@@ -1,4 +1,4 @@
-package com.alibaba.tomcat.test.nio.test;
+package com.alibaba.tomcat.test.nio;
 
 import java.io.IOException; 
 import java.net.InetSocketAddress; 

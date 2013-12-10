@@ -433,13 +433,15 @@ public class StandardService extends LifecycleMBeanBase implements Service {
             log.info(sm.getString("standardService.start.name", this.name));
         setState(LifecycleState.STARTING);
 
-        // Start our defined Container first
+        // Start our defined Container first	
+        // 启动Engine节点
         if (container != null) {
             synchronized (container) {
                 container.start();
             }
         }
 
+        // 启动server.xml定义的线程池
         synchronized (executors) {
             for (Executor executor: executors) {
                 executor.start();
@@ -450,6 +452,7 @@ public class StandardService extends LifecycleMBeanBase implements Service {
         mapperListener.start();
 
         // Start our defined Connectors second
+        // 这里需要考虑这个注释： 第二次启动连接器？
         synchronized (connectorsLock) {
             for (Connector connector: connectors) {
                 try {
@@ -458,9 +461,7 @@ public class StandardService extends LifecycleMBeanBase implements Service {
                         connector.start();
                     }
                 } catch (Exception e) {
-                    log.error(sm.getString(
-                            "standardService.connector.startFailed",
-                            connector), e);
+                    log.error(sm.getString("standardService.connector.startFailed", connector), e);
                 }
             }
         }
@@ -550,8 +551,9 @@ public class StandardService extends LifecycleMBeanBase implements Service {
             container.init();
         }
 
-        // Initialize any Executors
+        // Initialize any Executors TODO
         for (Executor executor : findExecutors()) {
+        	// 这里看起来又是和JMX相关 不明了就 
             if (executor instanceof JmxEnabled) {
                 ((JmxEnabled) executor).setDomain(getDomain());
             }
@@ -562,6 +564,7 @@ public class StandardService extends LifecycleMBeanBase implements Service {
         mapperListener.init();
 
         // Initialize our defined Connectors
+        // 初始化连接器Connector
         synchronized (connectorsLock) {
             for (Connector connector : connectors) {
                 try {

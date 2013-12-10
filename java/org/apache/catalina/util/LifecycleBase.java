@@ -129,18 +129,16 @@ public abstract class LifecycleBase implements Lifecycle {
      */
     @Override
     public final synchronized void start() throws LifecycleException {
-
+    	// 如果当前组件已经启动，再来尝试调用start()，抛出错误日志
         if (LifecycleState.STARTING_PREP.equals(state) ||
                 LifecycleState.STARTING.equals(state) ||
                 LifecycleState.STARTED.equals(state)) {
 
             if (log.isDebugEnabled()) {
                 Exception e = new LifecycleException();
-                log.debug(sm.getString("lifecycleBase.alreadyStarted",
-                        toString()), e);
+                log.debug(sm.getString("lifecycleBase.alreadyStarted", toString()), e);
             } else if (log.isInfoEnabled()) {
-                log.info(sm.getString("lifecycleBase.alreadyStarted",
-                        toString()));
+                log.info(sm.getString("lifecycleBase.alreadyStarted", toString()));
             }
 
             return;
@@ -152,6 +150,7 @@ public abstract class LifecycleBase implements Lifecycle {
             stop();
         } else if (!state.equals(LifecycleState.INITIALIZED) &&
                 !state.equals(LifecycleState.STOPPED)) {
+        	// 无效的事件流转
             invalidTransition(Lifecycle.BEFORE_START_EVENT);
         }
 
@@ -162,12 +161,10 @@ public abstract class LifecycleBase implements Lifecycle {
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
             setStateInternal(LifecycleState.FAILED, null, false);
-            throw new LifecycleException(
-                    sm.getString("lifecycleBase.startFail",toString()), t);
+            throw new LifecycleException(sm.getString("lifecycleBase.startFail",toString()), t);
         }
 
-        if (state.equals(LifecycleState.FAILED) ||
-                state.equals(LifecycleState.MUST_STOP)) {
+        if (state.equals(LifecycleState.FAILED) || state.equals(LifecycleState.MUST_STOP)) {
             stop();
         } else {
             // Shouldn't be necessary but acts as a check that sub-classes are

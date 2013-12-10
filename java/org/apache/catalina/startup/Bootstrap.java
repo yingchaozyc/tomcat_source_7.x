@@ -548,7 +548,7 @@ public final class Bootstrap {
             } else if (command.equals("start")) { 
             	// 关注点 启动
                 daemon.setAwait(true);		// 这里不明。	TODO
-                daemon.load(args);			 
+                daemon.load(args);			// 一个load带来的初始化，一大坨东西 
                 daemon.start();
             } else if (command.equals("stop")) { 
             	// 关注点 停止

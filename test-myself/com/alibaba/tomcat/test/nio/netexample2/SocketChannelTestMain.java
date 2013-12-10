@@ -198,7 +198,7 @@ public class SocketChannelTestMain {
                 if(last == end){  
                     break;  
                 }  
-            }  
+            }   
             byteBuffer.flip();  
             Charset charset = Charset.defaultCharset();  
             CharBuffer charBuffer = charset.decode(byteBuffer);  

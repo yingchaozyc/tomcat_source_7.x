@@ -1,5 +1,5 @@
-package com.alibaba.tomcat.test.nio.test;
- 
+package com.alibaba.tomcat.test.nio;
+
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -15,15 +15,15 @@ public class Test5 {
 		channel.configureBlocking(false);
 		channel.connect(new InetSocketAddress(8082));
 		
-		channel.register(selector, SelectionKey.OP_READ);
+		channel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+		
+		channel.finishConnect();				// 就因为这个狗血的finishConnect浪费了我三天时间
 		
 		while(true){
 			int count = selector.select();
 			if(count == 0){
 				continue;
-			} else{
-				System.out.println("client recv!");
-			}
+			} 
 			
 			Iterator<SelectionKey> it = selector.selectedKeys().iterator();  
             
@@ -40,11 +40,14 @@ public class Test5 {
 					StringBuffer str = new StringBuffer();
 					while(buffer.hasRemaining()){
 						str.append((char)buffer.get());
-					}
-					
-					System.out.println(str);
+					} 
 				
 					System.out.println("客户端收到服务器消息:" + str);
+				}
+				
+				if(tmpKey.isWritable()){
+					SocketChannel socketChannel = (SocketChannel) tmpKey.channel();
+					socketChannel.write(ByteBuffer.wrap("client resp : fuck you !".getBytes()));
 				}
 				
 				it.remove();  

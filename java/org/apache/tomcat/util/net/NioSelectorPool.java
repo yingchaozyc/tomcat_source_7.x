@@ -30,6 +30,7 @@ import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
 /**
+ * 线程安全的非阻塞的selector池。
  *
  * Thread safe non blocking selector pool
  * @author Filip Hanik
@@ -60,8 +61,9 @@ public class NioSelectorPool {
     protected ConcurrentLinkedQueue<Selector> selectors =
             new ConcurrentLinkedQueue<>();
 
+    // 巨难懂的方法 TODO
     protected Selector getSharedSelector() throws IOException {
-        if (SHARED && SHARED_SELECTOR == null) {
+        if (SHARED && (SHARED_SELECTOR == null)) {
             synchronized ( NioSelectorPool.class ) {
                 if ( SHARED_SELECTOR == null )  {
                     synchronized (Selector.class) {

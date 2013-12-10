@@ -422,7 +422,7 @@ public abstract class AbstractEndpoint<S> {
     /**
      * Priority of the worker threads.
      * 
-     * 线程优先级。
+     * 线程优先级。TODO
      */
     protected int threadPriority = Thread.NORM_PRIORITY;
     public void setThreadPriority(int threadPriority) { this.threadPriority = threadPriority; }

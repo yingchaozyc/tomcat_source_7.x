@@ -905,7 +905,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
         if ((realm != null) && (realm instanceof Lifecycle))
             ((Lifecycle) realm).start();
 
-        // Start our child containers, if any
+        // Start our child containers, if any		Engine的Children是Host
         Container children[] = findChildren();
         List<Future<Void>> results = new ArrayList<>();
         for (int i = 0; i < children.length; i++) {
@@ -923,8 +923,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
 
         }
         if (fail) {
-            throw new LifecycleException(
-                    sm.getString("containerBase.threadedStartFailed"));
+            throw new LifecycleException(sm.getString("containerBase.threadedStartFailed"));
         }
 
         // Start the Valves in our pipeline (including the basic), if any
