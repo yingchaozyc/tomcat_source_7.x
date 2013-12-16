@@ -24,6 +24,11 @@ import java.net.SocketException;
  * Properties that can be set in the &lt;Connector&gt; element
  * in server.xml. All properties are prefixed with &quot;socket.&quot;
  * and are currently only working for the Nio connector
+ * 
+ * <p>
+ * 		和Socket相关的properties配置列表。以下的属性可以配置在server.xml中的Connector节点中。
+ * 		所有的属性都需要加上"socket."前缀并且当前智能用在NIO连接器上。
+ * </p>
  *
  * @author Filip Hanik
  */
@@ -173,6 +178,12 @@ public class SocketProperties {
      */
     protected int unlockTimeout = 250;
 
+    /**
+     * 设置socket属性。
+     * 
+     * @param socket
+     * @throws SocketException
+     */
     public void setProperties(Socket socket) throws SocketException{
         if (rxBufSize != null)
             socket.setReceiveBufferSize(rxBufSize.intValue());
@@ -182,8 +193,7 @@ public class SocketProperties {
             socket.setOOBInline(ooBInline.booleanValue());
         if (soKeepAlive != null)
             socket.setKeepAlive(soKeepAlive.booleanValue());
-        if (performanceConnectionTime != null && performanceLatency != null &&
-                performanceBandwidth != null)
+        if (performanceConnectionTime != null && performanceLatency != null && performanceBandwidth != null)
             socket.setPerformancePreferences(
                     performanceConnectionTime.intValue(),
                     performanceLatency.intValue(),
@@ -191,8 +201,7 @@ public class SocketProperties {
         if (soReuseAddress != null)
             socket.setReuseAddress(soReuseAddress.booleanValue());
         if (soLingerOn != null && soLingerTime != null)
-            socket.setSoLinger(soLingerOn.booleanValue(),
-                    soLingerTime.intValue());
+            socket.setSoLinger(soLingerOn.booleanValue(), soLingerTime.intValue());
         if (soTimeout != null && soTimeout.intValue() >= 0)
             socket.setSoTimeout(soTimeout.intValue());
         if (tcpNoDelay != null)

@@ -211,7 +211,9 @@ public class NioBlockingSelector {
         return read;
     }
 
-
+    /**
+     * TODO from net. BlockPoller是用来维护辅Selector。
+     */
     protected static class BlockPoller extends Thread {
         protected volatile boolean run = true;
         protected Selector selector = null;
@@ -321,7 +323,7 @@ public class NioBlockingSelector {
             Runnable r = null;
             result = (events.size() > 0);
             while ( (r = events.poll()) != null ) {
-                r.run();
+                r.run();			// run()？ 为什么不是start()？
                 result = true;
             }
             return result;

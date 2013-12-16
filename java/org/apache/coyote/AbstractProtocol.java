@@ -579,8 +579,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler, MBeanRegis
         }
 
 
-        public SocketState process(SocketWrapper<S> wrapper,
-                SocketStatus status) {
+        public SocketState process(SocketWrapper<S> wrapper, SocketStatus status) {
             if (wrapper == null) {
                 // Nothing to do. Socket has been closed.
                 return SocketState.CLOSED;

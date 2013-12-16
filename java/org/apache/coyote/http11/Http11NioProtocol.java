@@ -211,9 +211,11 @@ public class Http11NioProtocol extends AbstractHttp11JsseProtocol<NioChannel> {
             }
         }
 
+        /**
+         * 终于接到了从channel过来的请求
+         */
         @Override
-        public SocketState process(SocketWrapper<NioChannel> socket,
-                SocketStatus status) {
+        public SocketState process(SocketWrapper<NioChannel> socket, SocketStatus status) {
             if (proto.npnHandler != null) {
                 SocketState ss = proto.npnHandler.process(socket, status);
                 if (ss != SocketState.OPEN) {

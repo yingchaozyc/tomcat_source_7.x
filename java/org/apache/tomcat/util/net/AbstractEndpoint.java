@@ -532,7 +532,7 @@ public abstract class AbstractEndpoint<S> {
 
 
     public void createExecutor() {
-        internalExecutor = true;
+        internalExecutor = true;					// 看起来这个参数是用来标记线程池到底是内部创建的还是外部xml配置的
         TaskQueue taskqueue = new TaskQueue();
         TaskThreadFactory tf = new TaskThreadFactory(getName() + "-exec-", daemon, getThreadPriority());
         executor = new ThreadPoolExecutor(getMinSpareThreads(), getMaxThreads(), 60, TimeUnit.SECONDS,taskqueue, tf);
