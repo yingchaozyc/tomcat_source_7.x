@@ -903,6 +903,7 @@ public abstract class AbstractHttp11Processor<S> extends AbstractProcessor<S> {
         openSocket = false;
         sendfileInProgress = false;
         readComplete = true;
+        
         if (endpoint.getUsePolling()) {
             keptAlive = false;
         } else {
@@ -913,8 +914,7 @@ public abstract class AbstractHttp11Processor<S> extends AbstractProcessor<S> {
             socketWrapper.setKeepAliveLeft(0);
         }
 
-        while (!error && keepAlive && !comet && !isAsync() &&
-                httpUpgradeHandler == null && !endpoint.isPaused()) {
+        while (!error && keepAlive && !comet && !isAsync() && httpUpgradeHandler == null && !endpoint.isPaused()) {
 
             // Parsing the request header
             try {
@@ -954,8 +954,7 @@ public abstract class AbstractHttp11Processor<S> extends AbstractProcessor<S> {
                 }
             } catch (IOException e) {
                 if (getLog().isDebugEnabled()) {
-                    getLog().debug(
-                            sm.getString("http11processor.header.parse"), e);
+                    getLog().debug(sm.getString("http11processor.header.parse"), e);
                 }
                 error = true;
                 break;
@@ -963,12 +962,10 @@ public abstract class AbstractHttp11Processor<S> extends AbstractProcessor<S> {
                 ExceptionUtils.handleThrowable(t);
                 UserDataHelper.Mode logMode = userDataHelper.getNextMode();
                 if (logMode != null) {
-                    String message = sm.getString(
-                            "http11processor.header.parse");
+                    String message = sm.getString("http11processor.header.parse");
                     switch (logMode) {
                         case INFO_THEN_DEBUG:
-                            message += sm.getString(
-                                    "http11processor.fallToDebug");
+                            message += sm.getString("http11processor.fallToDebug");
                             //$FALL-THROUGH$
                         case INFO:
                             getLog().info(message);
@@ -991,8 +988,7 @@ public abstract class AbstractHttp11Processor<S> extends AbstractProcessor<S> {
                 } catch (Throwable t) {
                     ExceptionUtils.handleThrowable(t);
                     if (getLog().isDebugEnabled()) {
-                        getLog().debug(sm.getString(
-                                "http11processor.request.prepare"), t);
+                        getLog().debug(sm.getString("http11processor.request.prepare"), t);
                     }
                     // 400 - Internal Server Error
                     response.setStatus(400);
@@ -1003,8 +999,7 @@ public abstract class AbstractHttp11Processor<S> extends AbstractProcessor<S> {
 
             if (maxKeepAliveRequests == 1) {
                 keepAlive = false;
-            } else if (maxKeepAliveRequests > 0 &&
-                    socketWrapper.decrementKeepAlive() <= 0) {
+            } else if (maxKeepAliveRequests > 0 && socketWrapper.decrementKeepAlive() <= 0) {
                 keepAlive = false;
             }
 
@@ -1019,9 +1014,7 @@ public abstract class AbstractHttp11Processor<S> extends AbstractProcessor<S> {
                     // If we fail here, then the response is likely already
                     // committed, so we can't try and set headers.
                     if(keepAlive && !error) { // Avoid checking twice.
-                        error = response.getErrorException() != null ||
-                                (!isAsync() &&
-                                statusDropsConnection(response.getStatus()));
+                        error = response.getErrorException() != null || (!isAsync() && statusDropsConnection(response.getStatus()));
                     }
                     setCometTimeouts(socketWrapper);
                 } catch (InterruptedIOException e) {
@@ -1037,8 +1030,7 @@ public abstract class AbstractHttp11Processor<S> extends AbstractProcessor<S> {
                     }
                 } catch (Throwable t) {
                     ExceptionUtils.handleThrowable(t);
-                    getLog().error(sm.getString(
-                            "http11processor.request.process"), t);
+                    getLog().error(sm.getString("http11processor.request.process"), t);
                     // 500 - Internal Server Error
                     response.setStatus(500);
                     getAdapter().log(request, response, 0);

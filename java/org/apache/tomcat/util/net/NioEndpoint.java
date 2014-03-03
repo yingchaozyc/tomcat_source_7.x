@@ -433,6 +433,8 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
 
     /**
      * Start the NIO endpoint, creating acceptor, poller threads.
+     * 
+     * 开启acceptor线程 & 轮询线程。
      */
     @Override
     public void startInternal() throws Exception {
@@ -1419,7 +1421,8 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
                     }
                 }
             }catch ( IOException x ) {
-                if ( log.isDebugEnabled() ) log.debug("Unable to complete sendfile request:", x);
+                if ( log.isDebugEnabled() ) 
+                	log.debug("Unable to complete sendfile request:", x);
                 cancelledKey(sk,SocketStatus.ERROR);
                 return false;
             }catch ( Throwable t ) {
@@ -1471,7 +1474,8 @@ public class NioEndpoint extends AbstractEndpoint<NioChannel> {
                         int ops = ka.interestOps() & ~OP_CALLBACK;
                         reg(key,ka,0);//avoid multiple calls, this gets re-registered after invocation
                         ka.interestOps(ops);
-                        if (!processSocket(ka.getChannel(), SocketStatus.OPEN_READ, true)) processSocket(ka.getChannel(), SocketStatus.DISCONNECT, true);
+                        if (!processSocket(ka.getChannel(), SocketStatus.OPEN_READ, true)) 
+                        	processSocket(ka.getChannel(), SocketStatus.DISCONNECT, true);
                     } else if ((ka.interestOps()&SelectionKey.OP_READ) == SelectionKey.OP_READ ||
                               (ka.interestOps()&SelectionKey.OP_WRITE) == SelectionKey.OP_WRITE) {
                         //only timeout sockets that we are waiting for a read from
